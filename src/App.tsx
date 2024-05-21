@@ -8,6 +8,8 @@ import { Button, FlexBoxCol, FlexBoxRow } from "./components/styled/styled";
 import { useTonConnect } from "./hooks/useTonConnect";
 import { CHAIN } from "@tonconnect/protocol";
 import "@twa-dev/sdk";
+import {useEffect} from "react";
+import {useTelegram} from "./hooks/useTelegram";
 
 const StyledApp = styled.div`
   background-color: #e8e8e8;
@@ -29,12 +31,27 @@ const AppContainer = styled.div`
 function App() {
   const { network } = useTonConnect();
 
+  useEffect(() => {
+    const script = document.createElement('script');
+
+    script.src = "https://telegram.org/js/telegram-web-app.js";
+    script.async = true;
+
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    }
+  }, []);
+  const {tg} = useTelegram();
+
   return (
     <StyledApp>
       <AppContainer>
         <FlexBoxCol>
           <FlexBoxRow>
             <TonConnectButton />
+            {tg.initDataUnsafe?.user?.username}
             <Button>
               {network
                 ? network === CHAIN.MAINNET
