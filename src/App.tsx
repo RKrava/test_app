@@ -43,7 +43,8 @@ function App() {
       document.body.removeChild(script);
     }
   }, []);
-  const {tg} = useTelegram();
+
+  const {tg, user} = useTelegram();
 
   return (
     <StyledApp>
@@ -51,7 +52,7 @@ function App() {
         <FlexBoxCol>
           <FlexBoxRow>
             <TonConnectButton />
-            {tg.initDataUnsafe?.user?.username}
+            {user?.username}
             <Button>
               {network
                 ? network === CHAIN.MAINNET
