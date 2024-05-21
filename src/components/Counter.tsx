@@ -20,24 +20,27 @@ export function Counter() {
 
       <Card>
         <FlexBoxCol>
-          <h3>Counter</h3>
-          <FlexBoxRow>
-            <b>Address</b>
-            <Ellipsis>{address}</Ellipsis>
-          </FlexBoxRow>
-          <FlexBoxRow>
-            <b>Value</b>
-            <div>{value ?? "Loading..."}</div>
-          </FlexBoxRow>
-          <Button
-            disabled={!connected}
-            className={`Button ${connected ? "Active" : "Disabled"}`}
-            onClick={() => {
-              sendIncrement();
-            }}
-          >
-            Increment
-          </Button>
+          <h3>Add bot</h3>
+          {/*<FlexBoxRow>*/}
+          {/*  <b>Address</b>*/}
+          {/*  <Ellipsis>{address}</Ellipsis>*/}
+          {/*</FlexBoxRow>*/}
+          {/*<FlexBoxRow>*/}
+          {/*  <b>Value</b>*/}
+          {/*  <div>{value ?? "Loading..."}</div>*/}
+          {/*</FlexBoxRow>*/}
+          <a href={'https://t.me/talkiefi1_bot?startgroup=start'}>
+            {/*<Button*/}
+            {/*  disabled={!connected}*/}
+            {/*  className={`Button ${connected ? "Active" : "Disabled"}`}*/}
+            {/*  onClick={() => {*/}
+            {/*    sendIncrement();*/}
+            {/*  }}*/}
+            {/*>*/}
+            {/*  Increment*/}
+            {/*</Button>*/}
+            add
+          </a>
         </FlexBoxCol>
       </Card>
     </div>
