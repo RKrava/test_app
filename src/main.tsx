@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { Helmet } from 'react-helmet';
 import "./index.css";
 // this manifest is used temporarily for development purposes
 const manifestUrl =
@@ -12,9 +13,14 @@ const queryClient = new QueryClient({
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <TonConnectUIProvider manifestUrl={manifestUrl}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </TonConnectUIProvider>
+    <>
+        <Helmet>
+            <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+        </Helmet>
+        <TonConnectUIProvider manifestUrl={manifestUrl}>
+            <QueryClientProvider client={queryClient}>
+                <App />
+            </QueryClientProvider>
+        </TonConnectUIProvider>
+    </>
 );
