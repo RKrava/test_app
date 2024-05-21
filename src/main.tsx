@@ -15,7 +15,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
         <Helmet>
-            <script src="https://telegram.org/js/telegram-web-app.js" async></script>
+            <script src="https://telegram.org/js/telegram-web-app.js"></script>
         </Helmet>
         <TonConnectUIProvider manifestUrl={manifestUrl}>
             <QueryClientProvider client={queryClient}>
