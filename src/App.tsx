@@ -9,6 +9,7 @@ import { useTonConnect } from "./hooks/useTonConnect";
 import { CHAIN } from "@tonconnect/protocol";
 import "@twa-dev/sdk";
 import {useEffect} from "react";
+import {useTelegram} from "./hooks/useTelegram";
 
 const StyledApp = styled.div`
   background-color: #e8e8e8;
@@ -43,7 +44,7 @@ function App() {
     }
   }, []);
 
-  // const {tg, user} = useTelegram();
+  const {tg, user} = useTelegram();
 
   return (
     <StyledApp>
@@ -51,7 +52,7 @@ function App() {
         <FlexBoxCol>
           <FlexBoxRow>
             <TonConnectButton />
-            {/*{user?.username}*/}
+            {user?.username}
             <Button>
               {network
                 ? network === CHAIN.MAINNET
