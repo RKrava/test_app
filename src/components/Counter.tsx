@@ -20,7 +20,7 @@ export function Counter() {
 
       <Card>
         <FlexBoxCol>
-          <h3>Add bot</h3>
+          <h3>Add private channel</h3>
           {/*<FlexBoxRow>*/}
           {/*  <b>Address</b>*/}
           {/*  <Ellipsis>{address}</Ellipsis>*/}
@@ -29,7 +29,7 @@ export function Counter() {
           {/*  <b>Value</b>*/}
           {/*  <div>{value ?? "Loading..."}</div>*/}
           {/*</FlexBoxRow>*/}
-          <a href={'https://t.me/talkiefi1_bot?startgroup=start'}>
+          <a href={'https://t.me/talkiefi1_bot?startchannel=start'}>
             {/*<Button*/}
             {/*  disabled={!connected}*/}
             {/*  className={`Button ${connected ? "Active" : "Disabled"}`}*/}

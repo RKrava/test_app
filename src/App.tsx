@@ -44,8 +44,8 @@ function App() {
             </Button>
           </FlexBoxRow>
           <Counter />
-          <TransferTon />
-          <Jetton />
+          {/*<TransferTon />*/}
+          {/*<Jetton />*/}
         </FlexBoxCol>
       </AppContainer>
     </StyledApp>
