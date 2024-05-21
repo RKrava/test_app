@@ -4,9 +4,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { Helmet } from 'react-helmet';
 import "./index.css";
-// this manifest is used temporarily for development purposes
-const manifestUrl =
-  "https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false } },
@@ -17,7 +14,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Helmet>
             <script src="https://telegram.org/js/telegram-web-app.js"></script>
         </Helmet>
-        <TonConnectUIProvider manifestUrl={manifestUrl}>
+        <TonConnectUIProvider>
             <QueryClientProvider client={queryClient}>
                 <App />
             </QueryClientProvider>
