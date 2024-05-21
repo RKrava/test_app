@@ -44,7 +44,7 @@ function App() {
     }
   }, []);
 
-  const {tg, user} = useTelegram();
+  // const {tg, user} = useTelegram();
 
   return (
     <StyledApp>
@@ -52,7 +52,7 @@ function App() {
         <FlexBoxCol>
           <FlexBoxRow>
             <TonConnectButton />
-            {user?.username}
+            {/*{user?.username}*/}
             <Button>
               {network
                 ? network === CHAIN.MAINNET
