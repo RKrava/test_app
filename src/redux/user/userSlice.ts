@@ -3,24 +3,18 @@ import {UserDataType} from "../../types/types";
 
 export interface UserState {
     isLoggedIn: boolean
-    isNewUser: {
-        isNew: boolean,
-        referralInviter: string | null
-    },
-    userData: UserDataType
+    userData: UserDataType,
 }
 
 const initialState: UserState = {
-    isNewUser: {
-        isNew: false,
-        referralInviter: null
-    },
     isLoggedIn: false,
     userData: {
         userName: '',
         walletAddress: '',
-        profilePhoto: ''
-    }
+        profilePhoto: '',
+        privateChannelId: ''
+    },
+
 }
 
 export const userSlice = createSlice({

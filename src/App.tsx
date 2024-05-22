@@ -15,6 +15,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "./redux/store";
 import {setUserData} from "./redux/user/userSlice";
 import {Profile} from "./components/Profile";
+import {UserApi} from "./api/user.api";
 
 const StyledApp = styled.div`
   background-color: #e8e8e8;
@@ -38,15 +39,18 @@ function App() {
   const userSlice = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
-  const {tg, tgUser} = useTelegram();
+  const {tgUser} = useTelegram();
 
   useEffect(() => {
     if (!!wallet?.account.address) {
-      dispatch(setUserData({
-        userName: tgUser?.username ?? '',
-        walletAddress: wallet?.account.address,
-        profilePhoto: tgUser?.photo_url ?? ''
-      }))
+      UserApi.updateUser(tgUser?.id.toString() ?? '', tgUser?.username ?? '', wallet?.account.address, '').then((r) => {
+        dispatch(setUserData({
+          userName: tgUser?.username ?? '',
+          walletAddress: wallet?.account.address,
+          profilePhoto: tgUser?.photo_url ?? '',
+          privateChannelId: r.data?.user?.private_channel_id
+        }))
+      })
     }
   }, [wallet?.account.address])
 
