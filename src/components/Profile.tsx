@@ -17,13 +17,13 @@ export function Profile() {
 
     const updateUsers = () => {
         UserApi.getUsers().then((response) => {
-            setUsers(response)
+            setUsers(response.data)
         })
     }
 
     const updateKeys = () => {
         UserApi.getKeys().then((response) => {
-            setKeys(response)
+            setKeys(response.data)
         })
     }
 
@@ -31,7 +31,7 @@ export function Profile() {
         updateUsers()
         updateKeys()
         UserApi.getConnectedChannels(tgUser?.id.toString() ?? '').then(r => {
-            setConnectedChannels(r)
+            setConnectedChannels(r.data)
         })
 
     }, [])
@@ -77,7 +77,7 @@ export function Profile() {
                 <p>Private channel: </p>
                 <div>
                     {connectedChannels.map((item: any) => {
-                        return <p>{item.chatData} {selectedChannelId === item.channel_id ? <button disabled>Selected</button> : <button onClick={() => {selectChannel(item.channel_id)}}>Select</button>}</p>
+                        return <p>{item.chatData.title} {selectedChannelId === item.channel_id ? <button disabled>Selected</button> : <button onClick={() => {selectChannel(item.channel_id)}}>Select</button>}</p>
                     })}
                 </div>
             </div>

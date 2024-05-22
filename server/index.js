@@ -54,31 +54,27 @@ app.get('/health', (request, response) => {
 })
 
 bot.on('my_chat_member', async (msg) => {
-    const chatId = msg.chat.id;
-    const fromId = msg.from.id
-    const canInviteUsers = msg.new_chat_member.can_invite_users
-    const canRestrictMembers = msg.new_chat_member.can_restrict_members
-
-    if (msg.chat.type !== 'channel') {
-        await bot.sendMessage(fromId, 'Бота нужно добавить в канал, а не в чат')
-        return
-    }
-
-    if (!canInviteUsers || !canRestrictMembers) {
-        await bot.sendMessage(fromId, 'У бота недостаточно прав, ему нужны права на добавление и удаление юзеров')
-        return
-    }
-
-    if (bd.connected_channels.filter((item) => item.channel_id === chatId).length === 0) {
+    // const canInviteUsers = msg.new_chat_member.can_invite_users
+    // const canRestrictMembers = msg.new_chat_member.can_restrict_members
+    //
+    // if (msg.chat.type !== 'channel') {
+    //     await bot.sendMessage(fromId, 'Бота нужно добавить в канал, а не в чат')
+    //     return
+    // }
+    //
+    // if (!canInviteUsers || !canRestrictMembers) {
+    //     await bot.sendMessage(fromId, 'У бота недостаточно прав, ему нужны права на добавление и удаление юзеров')
+    //     return
+    // }
+    if (bd.connected_channels.filter((item) => item.channel_id === chatId).length !== 0) {
         bd.connected_channels = bd.connected_channels.filter((item) => item.channel_id !== chatId)
         return
     }
 
     bd.connected_channels.push({
-        channel_id: chatId,
-        telegram_id: fromId
+        channel_id: msg.chat.id,
+        telegram_id: msg.from.id
     })
-
     // if(text === '/start') {
     //     await bot.sendMessage(chatId, 'Ниже появится кнопка, заполни форму', {
     //         reply_markup: {
@@ -230,12 +226,13 @@ app.get('/get_keys', async (req, res) => {
 app.get('/get_connected_channels', async (req, res) => {
     const { telegram_id } = req.query;  // Используем req.query для GET-запроса
     try {
-        const connectedChannels = bd.connected_channels.filter((item) => telegram_id === item.telegram_id);
+        const connectedChannels = bd.connected_channels.filter((item) => telegram_id == item.telegram_id);
         const newConnectedChannels = await Promise.all(connectedChannels.map(async (item) => {
             const chatData = await bot.getChat(item.channel_id);
             return { ...item, chatData };
         }));
 
+        console.log( bd.connected_channels)
         return res.status(200).json(newConnectedChannels);
     } catch (e) {
         return res.status(500).json(e.toString());
