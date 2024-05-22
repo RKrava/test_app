@@ -18,7 +18,8 @@ const initialState: UserState = {
     isLoggedIn: false,
     userData: {
         userName: '',
-        walletAddress: ''
+        walletAddress: '',
+        profilePhoto: ''
     }
 }
 
