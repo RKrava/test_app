@@ -8,7 +8,7 @@ export function Profile() {
 
     return (
         <div className="Container">
-            <img src={userData.profilePhoto} style={{width: '200px'}}/>
+            <div>ProfilePhoto: {userData.profilePhoto}</div>
             <div>Username: {userData.userName}</div>
             <div>WalletAddress: {userData.walletAddress}</div>
         </div>
