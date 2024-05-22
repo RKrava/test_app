@@ -1,5 +1,5 @@
 import "./App.css";
-import { TonConnectButton } from "@tonconnect/ui-react";
+import {TonConnectButton, useTonWallet} from "@tonconnect/ui-react";
 import { Counter } from "./components/Counter";
 import { Jetton } from "./components/Jetton";
 import { TransferTon } from "./components/TransferTon";
@@ -10,6 +10,11 @@ import { CHAIN } from "@tonconnect/protocol";
 import "@twa-dev/sdk";
 import {useEffect} from "react";
 import {useTelegram} from "./hooks/useTelegram";
+import {Login} from "./components/Login";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "./redux/store";
+import {setUserData} from "./redux/user/userSlice";
+import {Profile} from "./components/Profile";
 
 const StyledApp = styled.div`
   background-color: #e8e8e8;
@@ -29,44 +34,48 @@ const AppContainer = styled.div`
 `;
 
 function App() {
-  const { network } = useTonConnect();
+  const wallet = useTonWallet();
+  const userSlice = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
+
+  const {tg, tgUser} = useTelegram();
 
   useEffect(() => {
-    const script = document.createElement('script');
-
-    script.src = "https://telegram.org/js/telegram-web-app.js";
-    script.async = true;
-
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
+    if (!!wallet?.account.address) {
+      dispatch(setUserData({
+        userName: tgUser?.username ?? '',
+        walletAddress: wallet?.account.address,
+        profilePhoto: tgUser?.photo_url ?? ''
+      }))
     }
-  }, []);
-
-  const {tg, user} = useTelegram();
+  }, [wallet?.account.address])
 
   return (
-    <StyledApp>
-      <AppContainer>
-        <FlexBoxCol>
-          <FlexBoxRow>
-            <TonConnectButton />
-            {user?.username}
-            <Button>
-              {network
-                ? network === CHAIN.MAINNET
-                  ? "mainnet"
-                  : "testnet"
-                : "N/A"}
-            </Button>
-          </FlexBoxRow>
-          <Counter />
-          {/*<TransferTon />*/}
-          {/*<Jetton />*/}
-        </FlexBoxCol>
-      </AppContainer>
-    </StyledApp>
+    // <StyledApp>
+    //   <AppContainer>
+    //     <FlexBoxCol>
+    //       <FlexBoxRow>
+    //         {/*<TonConnectButton />*/}
+    //         {/*<Button>*/}
+    //         {/*  {network*/}
+    //         {/*    ? network === CHAIN.MAINNET*/}
+    //         {/*      ? "mainnet"*/}
+    //         {/*      : "testnet"*/}
+    //         {/*    : "N/A"}*/}
+    //         {/*</Button>*/}
+    //       </FlexBoxRow>
+    //       <Counter />
+    //       {/*<TransferTon />*/}
+    //       {/*<Jetton />*/}
+    //     </FlexBoxCol>
+    //   </AppContainer>
+    // </StyledApp>
+      <StyledApp>
+        <AppContainer>
+          <Login/>
+          {!userSlice.isLoggedIn ? <Login/> : <Profile/>}
+        </AppContainer>
+      </StyledApp>
   );
 }
 
