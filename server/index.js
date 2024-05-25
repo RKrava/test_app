@@ -250,10 +250,8 @@ app.get('/get_keys', async (req, res) => {
 })
 
 app.get('/get_connected_channels', async (req, res) => {
-    const { telegram_id } = req.query;  // Используем req.query для GET-запроса
-
     try {
-        const connectedChannels = bd.connected_channels.filter((item) => telegram_id == item.telegram_id);
+        const connectedChannels = bd.connected_channels
         const newConnectedChannels = await Promise.all(connectedChannels.map(async (item) => {
             const chatData = await bot.getChat(item.channel_id);
             item.title = chatData.title

@@ -30,9 +30,7 @@ export const updateConnectedChannels = (): AppThunk => async (dispatch, getState
         if (!tgUser) {
             return
         }
-        UserApi.getConnectedChannels(tgUser.id.toString()).then(r => {
-        // UserApi.getConnectedChannels('5810989802').then(async r => {
-            // 5810989802 penguin 323693764 krava
+        UserApi.getConnectedChannels().then(async r => {
             if (Array.isArray(r)) {
                 dispatch(setConnectedChannels(r))
             }

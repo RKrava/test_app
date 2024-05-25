@@ -32,12 +32,8 @@ export const UserApi = {
             .then(response => response.data)
             .catch(error => error.response.data)
     },
-    getConnectedChannels: async (telegram_id: string) => {
-        return await axios.get('http://localhost:8000/get_connected_channels',{
-            params: {
-                telegram_id
-            }
-        })
+    getConnectedChannels: async () => {
+        return await axios.get('http://localhost:8000/get_connected_channels')
             .then(response => response.data)
             .catch(error => error.response.data)
     },

@@ -19,8 +19,6 @@ export function Profile() {
     const connectedChannels = useSelector((state: RootState) => state.user.connectedChannels);
     const keys = useSelector((state: RootState) => state.user.keys);
     const [users, setUsers] = useState([] as Array<UserType>)
-    const [usersLoaded, setUsersLoaded] = useState(false);
-    const [channelsLoaded, setChannelsLoaded] = useState(false);
 
 
     const processKeys = async (response: Array<KeyType>) => {
@@ -81,7 +79,6 @@ export function Profile() {
                 }
             })
             setUsers(newUsers)
-            setUsersLoaded(true);
         })
     }
 
@@ -102,20 +99,17 @@ export function Profile() {
         updateKeys()
     }, [connectedChannels, users])
 
-    useEffect(() => {
-        console.log(keys)
-    }, [keys])
-
     return (
         <div className="Container">
             <div>Username: {userData.userName}</div>
             <div>WalletAddress: {userData.walletAddress}</div>
-            {tgUser?.id.toString()}
             <div>
                 <div><button onClick={() => tg.openTelegramLink('https://t.me/talkiefi1_bot?startchannel=true&admin=invite_users+restrict_members')}>Add bot</button></div>
                 <p>Private channel: </p>
                 <div>
-                    {connectedChannels?.map((item: ConnectedChannelType) => {
+                    {/*// 5810989802 penguin 323693764 krava*/}
+                    {connectedChannels?.filter((item) => item.telegram_id == tgUser?.id.toString()).map((item: ConnectedChannelType) => {
+                        // {connectedChannels?.filter((item) => item.telegram_id == '323693764').map((item: ConnectedChannelType) => {
                         return <p>{item?.title} {userData.privateChannelId == item.channel_id
                             ? <button disabled>Selected</button>
                             : <button onClick={() => updatePrivateChannelId(item.channel_id)}>Select</button>}</p>
@@ -138,7 +132,7 @@ export function Profile() {
                     {users?.map((item: any) => {
                         if (item.privateChannelId && wallet?.account?.address) {
                             const channel = connectedChannels.find((cc) => cc.channel_id == item.privateChannelId)
-
+                            console.log(connectedChannels)
                             return <p> {channel?.title}
                                 <button onClick={() => {UserApi.buyKey(wallet?.account?.address, item.walletAddress).then((r) => {
                                     console.log(r)
