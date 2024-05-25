@@ -1,9 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import {UserDataType} from "../../types/types";
+import {ConnectedChannelType, KeyType, UserDataType} from "../../types/types";
 
 export interface UserState {
     isLoggedIn: boolean
     userData: UserDataType,
+    connectedChannels: Array<ConnectedChannelType>,
+    keys: Array<KeyType>
 }
 
 const initialState: UserState = {
@@ -12,9 +14,11 @@ const initialState: UserState = {
         userName: '',
         walletAddress: '',
         profilePhoto: '',
-        privateChannelId: ''
-    },
+        privateChannelId: '',
 
+    },
+    connectedChannels: [],
+    keys: [],
 }
 
 export const userSlice = createSlice({
@@ -25,12 +29,20 @@ export const userSlice = createSlice({
             state.userData = action.payload
             state.isLoggedIn = true
         },
+        setConnectedChannels: (state: UserState, action: PayloadAction<Array<ConnectedChannelType>>) => {
+            state.connectedChannels = action.payload
+        },
+        setKeys: (state: UserState, action: PayloadAction<Array<KeyType>>) => {
+            state.keys = action.payload
+        },
     }
 })
 
 // Action creators are generated for each case reducer function
 export const {
-    setUserData
+    setUserData,
+    setConnectedChannels,
+    setKeys
 } = userSlice.actions
 
 export default userSlice.reducer

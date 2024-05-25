@@ -16,6 +16,7 @@ import {RootState} from "./redux/store";
 import {setUserData} from "./redux/user/userSlice";
 import {Profile} from "./components/Profile";
 import {UserApi} from "./api/user.api";
+import {updateUserDataThunk} from "./redux/user/userDataThunk";
 
 const StyledApp = styled.div`
   background-color: #e8e8e8;
@@ -35,26 +36,18 @@ const AppContainer = styled.div`
 `;
 
 function App() {
-  const wallet = useTonWallet();
-  const userSlice = useSelector((state: RootState) => state.user);
-  const dispatch = useDispatch();
+    const userSlice = useSelector((state: RootState) => state.user);
+    const dispatch = useDispatch<any>();
 
-  const {tgUser} = useTelegram();
+    const wallet = useTonWallet();
+    const {tgUser} = useTelegram();
 
-  useEffect(() => {
-    if (!!wallet?.account.address) {
-      UserApi.updateUser(tgUser?.id.toString() ?? '', tgUser?.username ?? '', wallet?.account.address, '').then((r) => {
-        dispatch(setUserData({
-          userName: tgUser?.username ?? '',
-          walletAddress: wallet?.account.address,
-          profilePhoto: tgUser?.photo_url ?? '',
-          privateChannelId: r.data?.user?.private_channel_id
-        }))
-      })
-    }
-  }, [wallet?.account.address])
+    // Обновляем данные юзера после входа через кошелек
+    useEffect(() => {
+        dispatch(updateUserDataThunk(wallet, tgUser))
+    }, [wallet?.account.address])
 
-  return (
+    return (
     // <StyledApp>
     //   <AppContainer>
     //     <FlexBoxCol>
@@ -77,10 +70,10 @@ function App() {
       <StyledApp>
         <AppContainer>
           <Login/>
-          {!userSlice.isLoggedIn ? <Login/> : <Profile/>}
+          <Profile/>
         </AppContainer>
       </StyledApp>
-  );
+    );
 }
 
 export default App;

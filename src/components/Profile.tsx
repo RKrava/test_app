@@ -6,68 +6,105 @@ import {useTelegram} from "../hooks/useTelegram";
 import {useEffect, useState} from "react";
 import {UserApi} from "../api/user.api";
 import {BotApi} from "../api/chat.api";
-import {setUserData} from "../redux/user/userSlice";
+import {setKeys, setUserData} from "../redux/user/userSlice";
+import {updateConnectedChannels} from "../redux/user/userDataThunk";
+import {UserType, KeyType, ConnectedChannelType} from "../types/types";
+import {it} from "node:test";
 
 export function Profile() {
     const {tg, tgUser} = useTelegram();
-    const dispatch = useDispatch()
+    const dispatch = useDispatch<any>()
     const wallet = useTonWallet();
     const userData = useSelector((state: RootState) => state.user.userData);
-    const [users, setUsers] = useState([] as any)
-    const [keys, setKeys] = useState([] as any)
-    const [connectedChannels, setConnectedChannels] = useState([] as any)
+    const connectedChannels = useSelector((state: RootState) => state.user.connectedChannels);
+    const keys = useSelector((state: RootState) => state.user.keys);
+    const [users, setUsers] = useState([] as Array<UserType>)
+    const [usersLoaded, setUsersLoaded] = useState(false);
+    const [channelsLoaded, setChannelsLoaded] = useState(false);
+
+
+    const processKeys = async (response: Array<KeyType>) => {
+
+        const countMap: { [key: string]: { wallet_address_buyer: string, wallet_address_owner: string, number: number } } = {};
+
+        response.forEach((item: KeyType) => {
+            const key = item.wallet_address_buyer+item.wallet_address_owner;
+            if (countMap[key]) {
+                countMap[key].number++;
+            } else {
+                countMap[key] = {
+                    wallet_address_buyer: item.wallet_address_buyer,
+                    wallet_address_owner: item.wallet_address_owner,
+                    number: 1
+                };
+            }
+        });
+        const newKeys = Object.values(countMap);
+
+        const data = await Promise.all(newKeys.map(async (item) => {
+            const owner = users.find((user: any) => item.wallet_address_owner === user.walletAddress);
+            if (!owner) {
+                return null;
+            }
+            const channel = connectedChannels.find((cc) => cc.channel_id === owner.privateChannelId);
+            if (!channel) {
+                return null;
+            }
+            const inviteLink = await BotApi.getInviteLink(owner.privateChannelId);
+            const result: KeyType = {
+                channelTitle: channel.title, inviteLink: inviteLink, number: item.number,
+                wallet_address_owner: item.wallet_address_owner, wallet_address_buyer: item.wallet_address_buyer
+            }
+            return result;
+        }))
+
+        const notNullData: Array<KeyType> = data.filter((item): item is KeyType => item !== null);
+        return notNullData
+    }
+
+    const updatePrivateChannelId = (channel_id: string) => {
+        UserApi.updateUser(tgUser?.id.toString() ?? '', tgUser?.username ?? '', wallet?.account?.address ?? '', channel_id)
+            .then(r =>
+            {
+                dispatch(setUserData({...userData, privateChannelId: channel_id}))
+            })
+    }
 
     const updateUsers = () => {
         UserApi.getUsers().then((response) => {
-            setUsers(response.data)
+            const newUsers = response.map((item: any) =>  {
+                return {
+                    userName: item.username,
+                    walletAddress: item.wallet_address,
+                    telegramId: item.telegram_id,
+                    privateChannelId: item.private_channel_id
+                }
+            })
+            setUsers(newUsers)
+            setUsersLoaded(true);
         })
     }
 
     const updateKeys = () => {
-        UserApi.getKeys().then((response) => {
-            setKeys(response.data)
+        UserApi.getKeys().then(async (response) => {
+            const processedKeys = await processKeys(response)
+            dispatch(setKeys(processedKeys))
         })
     }
 
+
     useEffect(() => {
         updateUsers()
-        updateKeys()
-        // UserApi.getConnectedChannels(tgUser?.id.toString() ?? '').then(r => {
-        //     setConnectedChannels(r.data)
-        // })
-
-        UserApi.getConnectedChannels('323693764').then(r => {
-            setConnectedChannels(r)
-            console.log(r)
-        })
+        dispatch(updateConnectedChannels())
     }, [])
 
-    const myChannels = [
-        {
-            channel_id: '1',
-            channel_name: 'Krava'
-        },
-        {
-            channel_id: '2',
-            channel_name: 'Penguin'
-        }
-    ]
+    useEffect(() => {
+        updateKeys()
+    }, [connectedChannels, users])
 
-    const allChannels = [
-        {
-            club_id: '1',
-            club_name: 'Penguin'
-        }
-    ]
-
-    const myKeys = [
-        {
-            channel_id: '1',
-            channel_name: 'Penguin',
-            number: 1,
-            club_link: ''
-        }
-    ]
+    useEffect(() => {
+        console.log(keys)
+    }, [keys])
 
     return (
         <div className="Container">
@@ -78,12 +115,10 @@ export function Profile() {
                 <div><button onClick={() => tg.openTelegramLink('https://t.me/talkiefi1_bot?startchannel=true&admin=invite_users+restrict_members')}>Add bot</button></div>
                 <p>Private channel: </p>
                 <div>
-                    {connectedChannels?.map((item: any) => {
-                        return <p>{item.chatData.title} {userData.privateChannelId === item.channel_id
+                    {connectedChannels?.map((item: ConnectedChannelType) => {
+                        return <p>{item?.title} {userData.privateChannelId == item.channel_id
                             ? <button disabled>Selected</button>
-                            : <button onClick={() =>
-                            {UserApi.updateUser(tgUser?.id.toString() ?? '', tgUser?.username ?? '', wallet?.account?.address ?? '', item.channel_id)
-                                .then(r => {dispatch(setUserData({...userData, privateChannelId: item.channel_id}))})}}>Select</button>}</p>
+                            : <button onClick={() => updatePrivateChannelId(item.channel_id)}>Select</button>}</p>
                     })}
                 </div>
             </div>
@@ -91,16 +126,29 @@ export function Profile() {
             <div>
                 <p>My clubs</p>
                 <div>
-                    {myKeys.map((item) => {
-                        return <p>{item.channel_name} Keys: {item.number} <a href={item.club_link}>Channel</a> </p>
+                    {keys.map((item: KeyType) => {
+                        return <p>{item.channelTitle} Keys: {item.number} <a href={item.inviteLink}>Channel</a> </p>
                     })}
                 </div>
             </div>
+
             <div>
                 <p>All clubs</p>
                 <div>
-                    {allChannels.map((item) => {
-                        return <p>{item.club_name} <button>Buy</button> <button>Sell</button></p>
+                    {users?.map((item: any) => {
+                        if (item.privateChannelId && wallet?.account?.address) {
+                            const channel = connectedChannels.find((cc) => cc.channel_id == item.privateChannelId)
+
+                            return <p> {channel?.title}
+                                <button onClick={() => {UserApi.buyKey(wallet?.account?.address, item.walletAddress).then((r) => {
+                                    console.log(r)
+                                    updateKeys()
+                                })}}>Buy</button>
+                                <button onClick={() => {UserApi.sellKey(wallet?.account?.address, item.walletAddress).then((r) => {
+                                    updateKeys()
+                                })}}>Sell</button>
+                            </p>
+                        }
                     })}
                 </div>
             </div>

@@ -20,7 +20,7 @@ export const BotApi = {
             .catch(error => error.response.data)
     },
     banChatMember: async (user_id: string, channelId: string) => {
-        return await axios.get('http://localhost:8000/get_invite_link',{
+        return await axios.get('http://localhost:8000/banChatMember',{
             params: {
                 user_id, channelId
             }
@@ -29,7 +29,7 @@ export const BotApi = {
             .catch(error => error.response.data)
     },
     unbanChatMember: async (user_id: string, channelId: string) => {
-        return await axios.get('http://localhost:8000/get_invite_link',{
+        return await axios.get('http://localhost:8000/unbanChatMember',{
             params: {
                 user_id, channelId
             }
