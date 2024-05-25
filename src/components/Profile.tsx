@@ -120,7 +120,7 @@ export function Profile() {
             <div>
                 <p>My clubs</p>
                 <div>
-                    {keys.map((item: KeyType) => {
+                    {keys.filter((item) => item.wallet_address_buyer === wallet?.account?.address).map((item: KeyType) => {
                         return <p>{item.channelTitle} Keys: {item.number} <a href={item.inviteLink}>Channel</a> </p>
                     })}
                 </div>
