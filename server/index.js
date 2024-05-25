@@ -66,8 +66,8 @@ bot.on('my_chat_member', async (msg) => {
     //     await bot.sendMessage(fromId, 'У бота недостаточно прав, ему нужны права на добавление и удаление юзеров')
     //     return
     // }
-    if (bd.connected_channels.filter((item) => item.channel_id === chatId).length !== 0) {
-        bd.connected_channels = bd.connected_channels.filter((item) => item.channel_id !== chatId)
+    if (bd.connected_channels.filter((item) => item.channel_id === msg.chat.id).length !== 0) {
+        bd.connected_channels = bd.connected_channels.filter((item) => item.channel_id !== msg.from.id)
         return
     }
 

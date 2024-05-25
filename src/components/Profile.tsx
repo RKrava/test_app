@@ -110,7 +110,7 @@ export function Profile() {
         <div className="Container">
             <div>Username: {userData.userName}</div>
             <div>WalletAddress: {userData.walletAddress}</div>
-
+            {tgUser?.id.toString()}
             <div>
                 <div><button onClick={() => tg.openTelegramLink('https://t.me/talkiefi1_bot?startchannel=true&admin=invite_users+restrict_members')}>Add bot</button></div>
                 <p>Private channel: </p>
