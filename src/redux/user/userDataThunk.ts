@@ -27,9 +27,10 @@ export const updateConnectedChannels = (): AppThunk => async (dispatch, getState
     try {
         const {tgUser} = useTelegram();
 
-        if (!tgUser) {
-            return
-        }
+        // if (!tgUser) {
+        //     return
+        // }
+
         UserApi.getConnectedChannels().then(async r => {
             if (Array.isArray(r)) {
                 dispatch(setConnectedChannels(r))

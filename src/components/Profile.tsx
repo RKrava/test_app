@@ -5,11 +5,9 @@ import {RootState} from "../redux/store";
 import {useTelegram} from "../hooks/useTelegram";
 import {useEffect, useState} from "react";
 import {UserApi} from "../api/user.api";
-import {BotApi} from "../api/chat.api";
 import {setKeys, setUserData} from "../redux/user/userSlice";
 import {updateConnectedChannels} from "../redux/user/userDataThunk";
 import {UserType, KeyType, ConnectedChannelType} from "../types/types";
-import {it} from "node:test";
 
 export function Profile() {
     const {tg, tgUser} = useTelegram();
@@ -39,7 +37,7 @@ export function Profile() {
         });
         const newKeys = Object.values(countMap);
 
-        const data = await Promise.all(newKeys.map(async (item) => {
+        const data = newKeys.map((item) => {
             const owner = users.find((user: any) => item.wallet_address_owner === user.walletAddress);
             if (!owner) {
                 return null;
@@ -48,13 +46,12 @@ export function Profile() {
             if (!channel) {
                 return null;
             }
-            const inviteLink = await BotApi.getInviteLink(owner.privateChannelId);
             const result: KeyType = {
-                channelTitle: channel.title, inviteLink: inviteLink, number: item.number,
+                channelTitle: channel.title, inviteLink: channel.invite_link, number: item.number,
                 wallet_address_owner: item.wallet_address_owner, wallet_address_buyer: item.wallet_address_buyer
             }
             return result;
-        }))
+        })
 
         const notNullData: Array<KeyType> = data.filter((item): item is KeyType => item !== null);
         return notNullData
@@ -108,11 +105,14 @@ export function Profile() {
                 <p>Private channel: </p>
                 <div>
                     {/*// 5810989802 penguin 323693764 krava*/}
-                    {connectedChannels?.filter((item) => item.telegram_id == tgUser?.id.toString()).map((item: ConnectedChannelType) => {
-                        // {connectedChannels?.filter((item) => item.telegram_id == '323693764').map((item: ConnectedChannelType) => {
-                        return <p>{item?.title} {userData.privateChannelId == item.channel_id
+                    {/*{connectedChannels?.filter((item) => item.telegram_id == tgUser?.id.toString()).map((item: ConnectedChannelType) => {*/}
+                        {connectedChannels?.filter((item) => item.telegram_id == '323693764').map((item: ConnectedChannelType) => {
+                        return <>
+
+                            <p>  <img src={item?.photo} style={{width: '35px', borderRadius: '50px'}}/> {item?.title} {userData.privateChannelId == item.channel_id
                             ? <button disabled>Selected</button>
                             : <button onClick={() => updatePrivateChannelId(item.channel_id)}>Select</button>}</p>
+                        </>
                     })}
                 </div>
             </div>

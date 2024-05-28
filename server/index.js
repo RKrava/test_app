@@ -53,6 +53,15 @@ app.get('/health', (request, response) => {
   response.json({ info: 'Working correct' })
 })
 
+bot.on('new_chat_title', async (msg) => {
+    //TODO: Записывать в бд новый тайтл
+})
+
+bot.on('new_chat_photo', async (msg) => {
+    //TODO: Записывать в бд новую фотку
+    //bot.getFileLink()
+})
+
 bot.on('my_chat_member', async (msg) => {
     // const canInviteUsers = msg.new_chat_member.can_invite_users
     // const canRestrictMembers = msg.new_chat_member.can_restrict_members
@@ -71,11 +80,17 @@ bot.on('my_chat_member', async (msg) => {
         return
     }
 
-    //TODO: записать один раз ссылку на приглашение
+    const createChatInviteLinkRequest = await bot.createChatInviteLink(
+        msg.chat.id,
+        {creates_join_request: true}
+    )
+
     bd.connected_channels.push({
         channel_id: msg.chat.id,
-        telegram_id: msg.from.id
+        telegram_id: msg.from.id,
+        invite_link: createChatInviteLinkRequest.invite_link
     })
+
     // if(text === '/start') {
     //     await bot.sendMessage(chatId, 'Ниже появится кнопка, заполни форму', {
     //         reply_markup: {
@@ -155,7 +170,6 @@ app.post('/update_user', async (req, res) => {
                 user.telegram_id = telegram_id;
                 user.username = username;
                 user.private_channel_id = private_channel_id;
-
                 return res.status(200).json({ message: "User updated successfully", user });
             } else {
                 return res.status(200).json({ message: "No changes detected", user });
@@ -168,6 +182,8 @@ app.post('/update_user', async (req, res) => {
                 wallet_address,
                 private_channel_id
             };
+            const getPhotoRequest = await bot.getUserProfilePhotos(user.telegram_id)
+            console.log(getPhotoRequest.photos[0][0])
 
             bd.users.push(user);
 
@@ -178,25 +194,16 @@ app.post('/update_user', async (req, res) => {
     }
 });
 
-app.get('/get_chat_info', async (req, res) => {
-    const {chatId} = req.query;
-
-    if (chatId) {
-        try {
-            const result = await bot.getChat(
-                chatId
-            )
-            return res.status(200).json(result)
-        } catch (e) {
-            return res.status(500).json(e.toString())
-        }
-    }
-})
-
 app.post('/buyKey', async (req, res) => {
     const {wallet_address_buyer, wallet_address_owner} = req.body;
-
     try {
+        const owner = bd.users.find((item) => item.wallet_address == wallet_address_owner)
+        const buyer = bd.users.find((item) => item.wallet_address == wallet_address_buyer)
+        await bot.unbanChatMember(
+            owner.private_channel_id,
+            buyer.telegram_id
+        )
+
        //TODO: Проверка на то что у человека нет канала
         bd.keys.push({
             wallet_address_buyer,
@@ -214,6 +221,15 @@ app.post('/sellKey', async (req, res) => {
     const {wallet_address_buyer, wallet_address_owner} = req.body;
 
     try {
+        const owner = bd.users.find((item) => item.wallet_address == wallet_address_owner)
+        const seller = bd.users.find((item) => item.wallet_address == wallet_address_buyer)
+
+        //TODO: проверка на то остался у чела хотя бы один ключ, тогда не банить
+        await bot.banChatMember(
+            owner.private_channel_id,
+            seller.telegram_id
+        )
+
         const index = bd.keys.findIndex(element =>
             element.wallet_address_buyer === wallet_address_buyer &&
             element.wallet_address_owner === wallet_address_owner
@@ -253,9 +269,10 @@ app.get('/get_connected_channels', async (req, res) => {
     try {
         const connectedChannels = bd.connected_channels
         const newConnectedChannels = await Promise.all(connectedChannels.map(async (item) => {
+            //TODO: Сделать просто записывание в бд и не слать каждый раз запрос
             const chatData = await bot.getChat(item.channel_id);
             item.title = chatData.title
-            item.photo = chatData.photo
+            item.photo = await bot.getFileLink(chatData.photo.big_file_id)
             return item;
         }));
         return res.status(200).json(newConnectedChannels);
@@ -264,54 +281,6 @@ app.get('/get_connected_channels', async (req, res) => {
     }
 });
 
-
-app.get('/get_invite_link', async (req, res) => {
-    const {channelId} = req.query;
-
-    if (channelId) {
-        try {
-            const result = await bot.createChatInviteLink(
-                channelId,
-                {creates_join_request: true}
-            )
-            return res.status(200).json(result.invite_link)
-        } catch (e) {
-            return res.status(500).json(e.toString())
-        }
-    }
-})
-
-app.post('/unbanChatMember', async (req, res) => {
-    const {user_id, channelId} = req.body;
-
-    if (user_id) {
-        try {
-            await bot.unbanChatMember(
-                channelId,
-                user_id
-            )
-            return res.status(200).json('User unbanned successfully')
-        } catch (e) {
-            return res.status(500).json(e.toString())
-        }
-    }
-})
-
-app.post('/banChatMember', async (req, res) => {
-    const {user_id, channelId} = req.body;
-
-    if (user_id) {
-        try {
-            await bot.banChatMember(
-                channelId,
-                user_id
-            )
-            return res.status(200).json('User removed successfully')
-        } catch (e) {
-            return res.status(500).json(e.toString())
-        }
-    }
-})
 
 app.listen(PORT, () => {
   console.log('Server is listening at :', PORT);

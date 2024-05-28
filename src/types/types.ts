@@ -9,12 +9,8 @@ export type ConnectedChannelType = {
     channel_id: string,
     telegram_id: string,
     title: string,
-    photo: {
-        small_file_id: string,
-        small_file_unique_id: string,
-        big_file_id: string,
-        big_file_unique_id: string
-    }
+    photo: string,
+    invite_link: string
 };
 
 export type KeyType = {
